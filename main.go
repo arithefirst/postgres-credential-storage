@@ -61,3 +61,43 @@ func setPassword(username string, password string, connectionStr postgresConnect
 	_, err = db.Exec(`INSERT INTO login (username, salt, hash) VALUES ($1, $2, $3)`, username, salt, hash)
 	return nil
 }
+
+func checkPassword(username string, password string, connectionStr postgresConnection) (bool, error) {
+	// Connect to the DB
+	ssl := "disable"
+	if connectionStr.ssl {
+		ssl = "enable"
+	}
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%v",
+		connectionStr.host, connectionStr.port, connectionStr.user, connectionStr.pass,
+		connectionStr.db, ssl)
+
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		return false, err
+	}
+
+	// Defer the disconnect
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	// Query the DB for salt and hash
+	res := db.QueryRow(`SELECT salt, hash FROM login WHERE username=$1`, username)
+	if res.Err() != nil {
+		panic(err)
+	}
+
+	// Extract the salt and stored hash to variables
+	var salt, storedHash string
+	err = res.Scan(&salt, &storedHash)
+	if err != nil {
+		return false, err
+	}
+
+	newHash := sha256.Sum256([]byte(password + salt))
+	return hex.EncodeToString(newHash[:]) == storedHash, nil
+}
