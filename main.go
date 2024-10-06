@@ -65,6 +65,34 @@ func setPassword(username string, password string, connectionStr postgresConnect
 	return nil
 }
 
+// Sets the password without hashing it
+func setPasswordNoHash(username string, passwordHash string, salt string, connectionStr postgresConnection) error {
+	// Connect to the DB
+	ssl := "disable"
+	if connectionStr.ssl {
+		ssl = "enable"
+	}
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%v",
+		connectionStr.host, connectionStr.port, connectionStr.user, connectionStr.pass,
+		connectionStr.db, ssl)
+
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		return err
+	}
+
+	// Defer the disconnect
+	defer func() {
+		err := db.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
+
+	_, err = db.Exec(`INSERT INTO login (username, salt, hash) VALUES ($1, $2, $3)`, username, salt, passwordHash)
+	return nil
+}
+
 // Check if password is valid, returns (true, nil) if so
 func checkPassword(username string, password string, connectionStr postgresConnection) (bool, error) {
 	// Connect to the DB
