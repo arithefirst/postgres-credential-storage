@@ -9,6 +9,7 @@ import (
 	"math/rand"
 )
 
+// Connection Details for postgres server
 type postgresConnection struct {
 	host string
 	port int
@@ -18,6 +19,7 @@ type postgresConnection struct {
 	ssl  bool
 }
 
+// Generates a 32 long random character string
 func generateSalt() string {
 	charSet := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&()*+,-./:;<=>?@[\\]^_{|}~"
 	b := make([]byte, 32)
@@ -27,6 +29,7 @@ func generateSalt() string {
 	return string(b)
 }
 
+// Set password in the database
 func setPassword(username string, password string, connectionStr postgresConnection) error {
 	// Connect to the DB
 	ssl := "disable"
@@ -62,6 +65,7 @@ func setPassword(username string, password string, connectionStr postgresConnect
 	return nil
 }
 
+// Check if password is valid, returns (true, nil) if so
 func checkPassword(username string, password string, connectionStr postgresConnection) (bool, error) {
 	// Connect to the DB
 	ssl := "disable"
