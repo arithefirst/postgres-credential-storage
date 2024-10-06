@@ -9,14 +9,14 @@ import (
 	"math/rand"
 )
 
-// Connection Details for postgres server
-type postgresConnection struct {
-	host string
-	port int
-	user string
-	pass string
-	db   string
-	ssl  bool
+// PostgresConnection Connection Details for postgres server
+type PostgresConnection struct {
+	Host string
+	Port int
+	User string
+	Pass string
+	Db   string
+	SSL  bool
 }
 
 // Generates a 32 long random character string
@@ -29,16 +29,16 @@ func generateSalt() string {
 	return string(b)
 }
 
-// Set password in the database
-func setPassword(username string, password string, connectionStr postgresConnection) error {
+// SetPassword Set password in the database
+func SetPassword(username string, password string, connectionStr PostgresConnection) error {
 	// Connect to the DB
 	ssl := "disable"
-	if connectionStr.ssl {
+	if connectionStr.SSL {
 		ssl = "enable"
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%v",
-		connectionStr.host, connectionStr.port, connectionStr.user, connectionStr.pass,
-		connectionStr.db, ssl)
+		connectionStr.Host, connectionStr.Port, connectionStr.User, connectionStr.Pass,
+		connectionStr.Db, ssl)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -65,16 +65,16 @@ func setPassword(username string, password string, connectionStr postgresConnect
 	return nil
 }
 
-// Sets the password without hashing it
-func setPasswordNoHash(username string, passwordHash string, salt string, connectionStr postgresConnection) error {
+// SetPasswordNoHash Sets the password without hashing it
+func SetPasswordNoHash(username string, passwordHash string, salt string, connectionStr PostgresConnection) error {
 	// Connect to the DB
 	ssl := "disable"
-	if connectionStr.ssl {
+	if connectionStr.SSL {
 		ssl = "enable"
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%v",
-		connectionStr.host, connectionStr.port, connectionStr.user, connectionStr.pass,
-		connectionStr.db, ssl)
+		connectionStr.Host, connectionStr.Port, connectionStr.User, connectionStr.Pass,
+		connectionStr.Db, ssl)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -93,16 +93,16 @@ func setPasswordNoHash(username string, passwordHash string, salt string, connec
 	return nil
 }
 
-// Check if password is valid, returns (true, nil) if so
-func checkPassword(username string, password string, connectionStr postgresConnection) (bool, error) {
+// CheckPassword Check if password is valid, returns (true, nil) if so
+func CheckPassword(username string, password string, connectionStr PostgresConnection) (bool, error) {
 	// Connect to the DB
 	ssl := "disable"
-	if connectionStr.ssl {
+	if connectionStr.SSL {
 		ssl = "enable"
 	}
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%v",
-		connectionStr.host, connectionStr.port, connectionStr.user, connectionStr.pass,
-		connectionStr.db, ssl)
+		connectionStr.Host, connectionStr.Port, connectionStr.User, connectionStr.Pass,
+		connectionStr.Db, ssl)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
